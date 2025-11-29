@@ -116,7 +116,7 @@ function LoginPage() {
           </form>
           
           <div className="footer-text">
-            <p>Belum punya akun? <a href="/register">Daftar di sini</a></p>
+            <p>Belum Punya Akun? <a href="/register">Daftar di sini</a></p>
           </div>
         </div>
       </div>
