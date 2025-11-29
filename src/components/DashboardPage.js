@@ -288,7 +288,7 @@ const DashboardPage = () => {
 
         {/* Footer */}
         <footer className="dashboard-footer">
-          <p>© {new Date().getFullYear()} Sistem Informasi Praktikum — {user.role}</p>
+          <p>© {new Date().getFullYear()} Sistem Informasi praktikum — {user.role}</p>
         </footer>
       </div>
     </div>
