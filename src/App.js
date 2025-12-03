@@ -18,7 +18,7 @@ function AppContent() {
     const location = useLocation();
 
     // Tentukan path mana yang TIDAK membutuhkan Navbar (Login, Register, Home root)
-    const noNavbarPaths = ['/login', '/register', '/presensi', '/']; 
+    const noNavbarPaths = ['/login', '/register', '/presensi', '/reports', '/']; 
     
     // Cek apakah Navbar harus disembunyikan di path saat ini
     const shouldHideNavbar = noNavbarPaths.includes(location.pathname);

@@ -1,44 +1,52 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
-// Import komponen Leaflet
+import Webcam from 'react-webcam';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import { useNavigate } from 'react-router-dom';
 import "leaflet/dist/leaflet.css"; 
-
 import "./PresensiPage.css";
 
+const API_BASE_URL = "http://localhost:3001/api/presensi"; 
+
 // Fix untuk ikon marker Leaflet
-// Catatan: Ini diperlukan untuk mengatasi masalah jalur aset di environment React tertentu.
-// Pastikan Anda telah menginstal 'leaflet' dan 'react-leaflet'.
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
   iconUrl: require('leaflet/dist/images/marker-icon.png'),
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
-// END OF LEAFLET FIX
-
-const API_BASE_URL = "http://localhost:3001/api/presensi"; 
 
 function PresensiPage() {
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
-  // HOOK BARU UNTUK LOKASI
-  const [coords, setCoords] = useState(null); // {lat, lng}
+  const [coords, setCoords] = useState(null); 
   const [isLocationLoading, setIsLocationLoading] = useState(true);
+  const [image, setImage] = useState(null); 
+  const webcamRef = useRef(null); 
 
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
-    return {
-      headers: {
-        Authorization: `Bearer ${token}` 
-      }
+  const getToken = () => localStorage.getItem("token");
+
+  const capture = useCallback(() => {
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      setImage(imageSrc); 
+    }
+  }, [webcamRef]);
+
+  const getAuthHeaders = (isFormData = false) => {
+    const token = getToken();
+    let headers = {
+      Authorization: `Bearer ${token}` 
     };
+    if (!isFormData) {
+      headers['Content-Type'] = 'application/json';
+    }
+    return { headers };
   };
 
-  // FUNGSI UNTUK MENDAPATKAN LOKASI PENGGUNA
   const getLocation = () => {
     setIsLocationLoading(true);
     if (navigator.geolocation) {
@@ -49,16 +57,14 @@ function PresensiPage() {
             lng: position.coords.longitude
           });
           setIsLocationLoading(false);
-          setError(""); // Hapus error jika berhasil mendapatkan lokasi
+          setError("");
         },
         (locError) => {
-          // Gagal mendapatkan lokasi
           const errorMsg = `Gagal mendapatkan lokasi: ${locError.message}. Mohon izinkan akses lokasi.`;
           setError(errorMsg);
           setIsLocationLoading(false);
-          setCoords(null); // Set koordinat ke null
+          setCoords(null);
         },
-        // Opsi Geolocation API
         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
       );
     } else {
@@ -68,38 +74,50 @@ function PresensiPage() {
     }
   };
 
-  const handleCheckIn = async () => {
-    // 1. Validasi Lokasi Sebelum Memulai
-    if (isLocationLoading) {
-      setError("Lokasi sedang dimuat, mohon tunggu sebentar.");
-      return;
+  const createFormData = async (type) => {
+    if (!coords || !image) {
+      throw new Error("Lokasi dan Foto wajib ada!");
     }
-    if (!coords) {
-      setError("Lokasi belum didapatkan. Mohon izinkan akses lokasi.");
-      return;
-    }
+    
+    const blob = await (await fetch(image)).blob();
 
+    const formData = new FormData();
+    formData.append('latitude', coords.lat);
+    formData.append('longitude', coords.lng);
+    formData.append('buktiFoto', blob, `${type}-selfie-${Date.now()}.jpeg`); 
+    
+    return formData;
+  };
+
+  const createCheckOutBody = () => {
+    if (!coords) {
+      throw new Error("Lokasi wajib ada!");
+    }
+    
+    return {
+      latitude: coords.lat,
+      longitude: coords.lng
+    };
+  };
+
+  const handleCheckIn = async () => {
     setIsLoading(true);
+    setError("");
+    setMessage("");
+    
     try {
-      setError("");
-      setMessage("");
+      const formData = await createFormData('check-in');
       
       const response = await axios.post(
         `${API_BASE_URL}/check-in`,
-        {
-          // 2. Kirim koordinat di body request
-          latitude: coords.lat,
-          longitude: coords.lng
-        },
-        getAuthHeaders()
+        formData,
+        getAuthHeaders(true) 
       );
       
-      setMessage(response.data.message);
+      setMessage(response.data.message || "Check-in berhasil!");
+      setImage(null);
     } catch (err) {
-      const errorMessage = err.response 
-        ? err.response.data.message 
-        : "Gagal melakukan check-in. Periksa koneksi ke server.";
-        
+      const errorMessage = err.message || (err.response ? err.response.data.message : "Gagal melakukan check-in. Periksa koneksi ke server.");
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -107,50 +125,37 @@ function PresensiPage() {
   };
 
   const handleCheckOut = async () => {
-    // 1. Validasi Lokasi Sebelum Memulai
-    if (isLocationLoading) {
-      setError("Lokasi sedang dimuat, mohon tunggu sebentar.");
-      return;
-    }
-    if (!coords) {
-      setError("Lokasi belum didapatkan. Mohon izinkan akses lokasi.");
-      return;
-    }
-
     setIsLoading(true);
+    setError("");
+    setMessage("");
+    
     try {
-      setError("");
-      setMessage("");
+      const checkOutBody = createCheckOutBody(); 
       
       const response = await axios.post(
         `${API_BASE_URL}/check-out`,
-        {
-          // 2. Kirim koordinat di body request
-          latitude: coords.lat,
-          longitude: coords.lng
-        },
-        getAuthHeaders()
+        checkOutBody,
+        getAuthHeaders(false)
       );
       
-      setMessage(response.data.message);
+      setMessage(response.data.message || "Check-out berhasil!");
+      setImage(null);
     } catch (err) {
-      const errorMessage = err.response 
-        ? err.response.data.message 
-        : "Gagal melakukan check-out. Periksa koneksi ke server.";
-
+      const errorMessage = err.message || (err.response ? err.response.data.message : "Gagal melakukan check-out. Periksa koneksi ke server.");
       setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Dapatkan lokasi saat komponen dimuat
+  const handleBackToDashboard = () => {
+    navigate('/dashboard');
+  };
+  
   useEffect(() => {
     getLocation();
-    // Cleanup function jika diperlukan
   }, []); 
   
-  // Generate floating shapes untuk background
   const generateFloatingShapes = () => {
     const shapes = [];
     for (let i = 0; i < 15; i++) {
@@ -179,15 +184,16 @@ function PresensiPage() {
   return (
     <div className="presensi-container">
       {/* Tombol Kembali ke Dashboard */}
-      <div className="presensi-back-button">
-        <a href="/dashboard">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Kembali ke Dashboard
-        </a>
-      </div>
-      
+      <button
+        onClick={handleBackToDashboard}
+        className="presensi-dashboard-back-btn"
+      >
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span>Kembali ke Dashboard</span>
+      </button>
+
       {/* Animated Background */}
       <div className="presensi-animated-background">
         <div className="presensi-floating-shapes">
@@ -204,47 +210,102 @@ function PresensiPage() {
             </svg>
           </div>
           <h1 className="presensi-title">Presensi Harian</h1>
-          <p className="presensi-subtitle">Catat kehadiran Anda dengan mudah</p>
+          <p className="presensi-subtitle">Catat kehadiran Anda dengan mudah dan akurat</p>
         </div>
 
-        {/* TAMPILAN STATUS LOKASI */}
-        <div className={`presensi-location-status ${coords ? 'status-ok' : (isLocationLoading ? 'status-loading' : 'status-fail')}`}>
-            <svg fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
+        {/* Status Lokasi */}
+        <div className="presensi-location-status-wrapper">
+          <div className={`presensi-location-status ${coords ? 'status-ok' : (isLocationLoading ? 'status-loading' : 'status-fail')}`}>
+            <svg fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
             </svg>
-            <span>{isLocationLoading ? 'Mencari Lokasi...' : (coords ? `Lokasi Aktif: ${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}` : 'Lokasi Gagal (Cek Izin Browser)')}</span>
+            <span>
+              {isLocationLoading ? 'Mencari lokasi Anda...' : 
+               coords ? `Lokasi ditemukan: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}` : 
+               'Lokasi tidak dapat diakses'}
+            </span>
+          </div>
         </div>
 
-        {/* VISUALISASI PETA DITAMBAHKAN DI SINI */}
+        {/* Visualisasi Peta */}
         {coords && (
-            <div className="my-4 presensi-map-wrapper"> 
-                <MapContainer 
-                    key={`${coords.lat}-${coords.lng}`}
-                    center={[coords.lat, coords.lng]} 
-                    zoom={15} 
-                    style={{ height: '300px', width: '100%' }}
-                    scrollWheelZoom={false}
-                >
-                    <TileLayer
-                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-                    />
-                    <Marker position={[coords.lat, coords.lng]}>
-                        <Popup>Lokasi Presensi Anda</Popup>
-                    </Marker>
-                </MapContainer>
-            </div>
+          <div className="presensi-map-wrapper"> 
+            <MapContainer 
+              key={`${coords.lat}-${coords.lng}`}
+              center={[coords.lat, coords.lng]} 
+              zoom={16} 
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={false}
+              dragging={false}
+            >
+              <TileLayer
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              />
+              <Marker position={[coords.lat, coords.lng]}>
+                <Popup>Anda berada di sini</Popup>
+              </Marker>
+            </MapContainer>
+          </div>
         )}
-        {/* AKHIR PETA */}
 
         {/* Main Card */}
         <div className="presensi-card">
+          {/* Camera Section */}
+          <div className="presensi-camera-section">
+            <div className="presensi-camera-container">
+              {image ? (
+                <img src={image} alt="Selfie Bukti Presensi" className="presensi-photo" />
+              ) : (
+                <Webcam
+                  audio={false}
+                  ref={webcamRef}
+                  screenshotFormat="image/jpeg"
+                  className="presensi-webcam"
+                  videoConstraints={{
+                    facingMode: "user",
+                    width: 640,
+                    height: 480
+                  }}
+                />
+              )}
+            </div>
+
+            {/* Tombol Kamera */}
+            <div className="presensi-camera-actions">
+              {!image ? (
+                <button
+                  onClick={capture}
+                  disabled={isLoading || isLocationLoading}
+                  className="presensi-capture-btn"
+                >
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Ambil Foto
+                </button>
+              ) : (
+                <button 
+                  onClick={() => setImage(null)} 
+                  disabled={isLoading}
+                  className="presensi-retake-btn"
+                >
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Foto Ulang
+                </button>
+              )}
+            </div>
+          </div>
+
           {/* Status Messages */}
           <div className="presensi-status">
             {isLoading && (
               <div className="presensi-loading">
                 <div className="presensi-spinner"></div>
-                <span>Memproses presensi...</span>
+                <span>Memproses presensi Anda...</span>
               </div>
             )}
 
@@ -267,13 +328,12 @@ function PresensiPage() {
             )}
           </div>
 
-          {/* Action Buttons */}
+          {/* Action Buttons - PERBAIKAN: Check-Out tidak membutuhkan foto */}
           <div className="presensi-actions">
             <button
               onClick={handleCheckIn}
-              // Disabled jika sedang loading atau lokasi belum siap
-              disabled={isLoading || isLocationLoading || !coords}
-              className={`presensi-btn presensi-checkin ${isLoading || isLocationLoading || !coords ? 'disabled' : ''}`}
+              disabled={isLoading || isLocationLoading || !coords || !image}
+              className={`presensi-btn presensi-checkin ${isLoading || isLocationLoading || !coords || !image ? 'disabled' : ''}`}
             >
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -283,7 +343,6 @@ function PresensiPage() {
 
             <button
               onClick={handleCheckOut}
-              // Disabled jika sedang loading atau lokasi belum siap
               disabled={isLoading || isLocationLoading || !coords}
               className={`presensi-btn presensi-checkout ${isLoading || isLocationLoading || !coords ? 'disabled' : ''}`}
             >
@@ -300,12 +359,12 @@ function PresensiPage() {
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <span>Tips Presensi</span>
+              <span>Panduan Presensi</span>
             </div>
             <div className="presensi-info-content">
-              <p>Pastikan izin lokasi diaktifkan di browser Anda.</p>
-              <p>Lakukan check-in dan check-out dari lokasi yang valid.</p>
-              <p>Pastikan koneksi internet stabil.</p>
+              <p>Ambil foto selfie yang jelas sebagai bukti kehadiran</p>
+              <p>Pastikan izin lokasi diaktifkan di browser Anda</p>
+              <p>Lakukan Check-In saat datang dan Check-Out saat pulang</p>
             </div>
           </div>
         </div>
