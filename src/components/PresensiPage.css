@@ -13,6 +13,11 @@
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
 }
 
 .presensi-animated-background {
@@ -62,14 +67,54 @@
   position: relative;
   z-index: 1;
   padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width: 800px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Back to Dashboard Button */
+.presensi-back-button {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+.presensi-back-button a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50px;
+  padding: 10px 20px;
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.presensi-back-button a:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.presensi-back-button svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* Header Section */
 .presensi-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
+  width: 100%;
 }
 
 .presensi-header-icon {
@@ -82,6 +127,12 @@
   justify-content: center;
   margin: 0 auto 1.5rem;
   box-shadow: 0 15px 35px rgba(79, 172, 254, 0.3);
+  transform: rotate(-5deg);
+  transition: transform 0.3s ease;
+}
+
+.presensi-header-icon:hover {
+  transform: rotate(0deg);
 }
 
 .presensi-header-icon svg {
@@ -91,16 +142,71 @@
 }
 
 .presensi-title {
-  font-size: 3rem;
+  font-size: 2.8rem;
   font-weight: 700;
   color: white;
   margin-bottom: 0.5rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .presensi-subtitle {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
   font-weight: 400;
+  letter-spacing: 0.5px;
+}
+
+/* Location Status */
+.presensi-location-status {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 12px 20px;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-weight: 500;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.presensi-location-status svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.presensi-location-status.status-ok {
+  color: #4cd964;
+  background: rgba(76, 217, 100, 0.15);
+  border-color: rgba(76, 217, 100, 0.3);
+}
+
+.presensi-location-status.status-loading {
+  color: #ff9500;
+  background: rgba(255, 149, 0, 0.15);
+  border-color: rgba(255, 149, 0, 0.3);
+}
+
+.presensi-location-status.status-fail {
+  color: #ff3b30;
+  background: rgba(255, 59, 48, 0.15);
+  border-color: rgba(255, 59, 48, 0.3);
+}
+
+/* Map Wrapper */
+.presensi-map-wrapper {
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 2rem;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 /* Main Card */
@@ -110,12 +216,12 @@
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 25px;
-  padding: 3rem;
+  padding: 2.5rem;
   width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
+  max-width: 600px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   position: relative;
+  margin: 0 auto;
 }
 
 .presensi-card::before {
@@ -136,6 +242,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 100%;
 }
 
 .presensi-loading {
@@ -150,6 +257,7 @@
   font-weight: 500;
   width: 100%;
   justify-content: center;
+  max-width: 500px;
 }
 
 .presensi-spinner {
@@ -178,6 +286,7 @@
   gap: 0.75rem;
   width: 100%;
   justify-content: center;
+  max-width: 500px;
 }
 
 .presensi-error {
@@ -192,14 +301,16 @@
   gap: 0.75rem;
   width: 100%;
   justify-content: center;
+  max-width: 500px;
 }
 
 /* Action Buttons */
 .presensi-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .presensi-btn {
@@ -217,6 +328,7 @@
   gap: 0.75rem;
   position: relative;
   overflow: hidden;
+  min-height: 60px;
 }
 
 .presensi-btn::before {
@@ -250,7 +362,7 @@
 }
 
 .presensi-checkin:hover:not(:disabled) {
-  transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.02);
   box-shadow: 0 12px 35px rgba(79, 172, 254, 0.4);
 }
 
@@ -260,7 +372,7 @@
 }
 
 .presensi-checkout:hover:not(:disabled) {
-  transform: translateY(-3px);
+  transform: translateY(-3px) scale(1.02);
   box-shadow: 0 12px 35px rgba(245, 87, 108, 0.4);
 }
 
@@ -276,6 +388,7 @@
   border-radius: 15px;
   padding: 1.5rem;
   text-align: left;
+  width: 100%;
 }
 
 .presensi-info-header {
@@ -294,16 +407,17 @@
 }
 
 .presensi-info-content {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 0.9rem;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .presensi-info-content p {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  padding-left: 10px;
 }
 
 .presensi-info-content p:last-child {
@@ -311,13 +425,18 @@
 }
 
 .presensi-info-content p::before {
-  content: '•';
+  content: '✓';
   color: #4facfe;
   font-weight: bold;
+  font-size: 1rem;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .presensi-container {
+    padding: 15px;
+  }
+  
   .presensi-content {
     padding: 1rem;
   }
@@ -330,25 +449,6 @@
     font-size: 2.2rem;
   }
   
-  .presensi-actions {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .presensi-btn {
-    padding: 1.1rem 1.5rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .presensi-card {
-    padding: 1.5rem 1rem;
-  }
-  
-  .presensi-title {
-    font-size: 1.8rem;
-  }
-  
   .presensi-header-icon {
     width: 80px;
     height: 80px;
@@ -358,4 +458,79 @@
     width: 35px;
     height: 35px;
   }
+  
+  .presensi-actions {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .presensi-btn {
+    padding: 1.1rem 1.5rem;
+  }
+  
+  .presensi-back-button {
+    top: 15px;
+    left: 15px;
+  }
+  
+  .presensi-back-button a {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .presensi-container {
+    padding: 10px;
+  }
+  
+  .presensi-card {
+    padding: 1.5rem 1rem;
+  }
+  
+  .presensi-title {
+    font-size: 1.8rem;
+  }
+  
+  .presensi-subtitle {
+    font-size: 1rem;
+  }
+  
+  .presensi-location-status {
+    font-size: 0.9rem;
+    padding: 10px 15px;
+  }
+  
+  .presensi-back-button a {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .presensi-back-button svg {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Animation for elements */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.presensi-header,
+.presensi-location-status,
+.presensi-map-wrapper,
+.presensi-card {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.presensi-card {
+  animation-delay: 0.2s;
 }
