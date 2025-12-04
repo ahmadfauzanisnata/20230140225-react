@@ -10,6 +10,10 @@ function ReportPage() {
   const [endDate, setEndDate] = useState("");
   const [selectedPhoto, setSelectedPhoto] = useState(null);
 
+  // Base URL untuk mengakses foto dari server
+  const API_BASE_URL = "http://localhost:3001";
+  const UPLOADS_BASE_URL = `${API_BASE_URL}/uploads`;
+
   useEffect(() => {
     const mockTokenKey = 'mock_auth_token_set';
     if (!localStorage.getItem("token")) {
@@ -35,6 +39,25 @@ function ReportPage() {
     };
   };
 
+  // Fungsi untuk membangun URL foto yang benar
+  const getPhotoUrl = useCallback((photoPath) => {
+    if (!photoPath) return null;
+    
+    // Jika photoPath sudah merupakan URL lengkap
+    if (photoPath.startsWith('http://') || photoPath.startsWith('https://')) {
+      return photoPath;
+    }
+    
+    // Jika photoPath hanya nama file
+    if (photoPath.includes('/')) {
+      // Jika ada path dalam string
+      return `${UPLOADS_BASE_URL}/${photoPath}`;
+    } else {
+      // Jika hanya nama file
+      return `${UPLOADS_BASE_URL}/${photoPath}`;
+    }
+  }, [UPLOADS_BASE_URL]);
+
   const fetchReports = useCallback(async (query = "") => {
     const token = localStorage.getItem("token");
     
@@ -57,7 +80,14 @@ function ReportPage() {
       }
 
       const data = await response.json();
-      setReports(data.data || []);
+      
+      // Proses data untuk menambahkan URL foto yang benar
+      const processedData = data.data?.map(report => ({
+        ...report,
+        photoUrl: getPhotoUrl(report.buktiFoto)
+      })) || [];
+      
+      setReports(processedData);
       setError(null);
     } catch (err) {
       setReports([]);
@@ -66,7 +96,7 @@ function ReportPage() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [getPhotoUrl]); // Sekarang include getPhotoUrl dalam dependencies
 
   useEffect(() => {
     fetchReports();
@@ -123,14 +153,16 @@ function ReportPage() {
   };
 
   const handlePhotoClick = (photoUrl) => {
-    setSelectedPhoto(photoUrl);
+    if (photoUrl) {
+      setSelectedPhoto(photoUrl);
+    }
   };
 
   const handleClosePhotoModal = () => {
     setSelectedPhoto(null);
   };
 
-  const formatDateTime = (dateString, type = 'date') => {
+  const formatDateTime = useCallback((dateString, type = 'date') => {
     if (!dateString) return 'N/A';
     try {
       const date = new Date(dateString);
@@ -153,11 +185,14 @@ function ReportPage() {
     } catch (error) {
       return 'N/A';
     }
-  };
+  }, []);
 
   const handleBackToDashboard = () => {
     window.location.href = '/dashboard';
   };
+
+  // Fallback image untuk error
+  const fallbackImage = "https://placehold.co/50x50/667eea/ffffff?text=FOTO";
 
   return (
     <div className="report-container">
@@ -223,7 +258,7 @@ function ReportPage() {
               </svg>
             </div>
             <div className="report-stat-value">
-              {reports.filter(r => r.buktiFoto).length}
+              {reports.filter(r => r.photoUrl).length}
             </div>
             <div className="report-stat-label">Dengan Foto</div>
           </div>
@@ -369,7 +404,7 @@ function ReportPage() {
                     reports.map((presensi) => {
                       const latitude = presensi.latitude;
                       const longitude = presensi.longitude;
-                      const photoUrl = presensi.buktiFoto;
+                      const photoUrl = presensi.photoUrl;
                       
                       return (
                         <tr key={presensi.id}>
@@ -435,16 +470,23 @@ function ReportPage() {
                           {/* Foto (In) */}
                           <td>
                             {photoUrl ? (
-                              <img 
-                                src={photoUrl} 
-                                alt="Bukti Check-in" 
-                                className="photo-thumbnail"
+                              <div 
+                                className="photo-thumbnail-container"
                                 onClick={() => handlePhotoClick(photoUrl)}
-                                onError={(e) => { 
-                                  e.target.onerror = null; 
-                                  e.target.src = "https://placehold.co/50x50/667eea/ffffff?text=FOTO"; 
-                                }}
-                              />
+                                title="Klik untuk memperbesar"
+                              >
+                                <img 
+                                  src={photoUrl} 
+                                  alt="Bukti Check-in" 
+                                  className="photo-thumbnail"
+                                  onError={(e) => { 
+                                    e.target.onerror = null; 
+                                    e.target.src = fallbackImage;
+                                    console.error('Error loading photo:', photoUrl);
+                                  }}
+                                />
+                                <div className="photo-hover-text">Lihat Foto</div>
+                              </div>
                             ) : (
                               <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.85rem', fontStyle: 'italic' }}>
                                 Tidak tersedia
@@ -479,18 +521,29 @@ function ReportPage() {
         {selectedPhoto && (
           <div className="photo-modal-overlay" onClick={handleClosePhotoModal}>
             <div className="photo-modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="photo-modal-header">
+                <span>Foto Bukti Presensi</span>
+                <button className="photo-modal-close" onClick={handleClosePhotoModal} aria-label="Tutup">
+                  &times;
+                </button>
+              </div>
               <img 
                 src={selectedPhoto} 
                 alt="Foto Bukti Presensi - Ukuran Penuh" 
                 className="photo-full-size"
                 onError={(e) => { 
                   e.target.onerror = null; 
-                  e.target.src = "https://placehold.co/600x400/667eea/ffffff?text=FOTO+TIDAK+TERSEDIA"; 
+                  e.target.src = "https://placehold.co/600x400/667eea/ffffff?text=FOTO+TIDAK+TERSEDIA";
                 }}
               />
-              <button className="photo-modal-close" onClick={handleClosePhotoModal} aria-label="Tutup">
-                &times;
-              </button>
+              <div className="photo-modal-footer">
+                <a href={selectedPhoto} target="_blank" rel="noopener noreferrer" className="photo-download-link">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Unduh Foto
+                </a>
+              </div>
             </div>
           </div>
         )}

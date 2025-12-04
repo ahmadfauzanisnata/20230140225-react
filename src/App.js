@@ -10,6 +10,7 @@ import ReportPage from './pages/ReportPage';
 import PresensiPage from './components/PresensiPage';
 import Navbar from './components/Navbar'; 
 
+
 // ----------------------------------------------------
 // Komponen Pembungkus untuk Menangani Logika (useLocation harus di dalam Router)
 // ----------------------------------------------------
@@ -38,6 +39,7 @@ function AppContent() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/reports" element={<ReportPage/>} />
               <Route path="/presensi" element={<PresensiPage/>} />
+                
               
               {/* Route Halaman Public/Awal */}
               <Route path="/login" element={<LoginPage />} />

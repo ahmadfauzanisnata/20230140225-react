@@ -119,17 +119,6 @@
   transform: translateX(-3px);
 }
 
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
 /* Header Section */
 .report-header {
   text-align: center;
@@ -301,6 +290,7 @@
 .report-filter-actions {
   display: flex;
   gap: 1rem;
+  margin-top: 1rem;
 }
 
 .report-filter-btn {
@@ -542,23 +532,51 @@
   line-height: 1.6;
 }
 
-/* Styling Foto Thumbnail */
+/* --- CSS untuk foto thumbnail dan modal (TAMBAHAN) --- */
+.photo-thumbnail-container {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
 .photo-thumbnail {
   width: 50px;
   height: 50px;
   object-fit: cover;
-  cursor: pointer;
   border-radius: 8px;
-  transition: all 0.3s ease;
   border: 2px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
 }
 
 .photo-thumbnail:hover {
   transform: scale(1.1);
   border-color: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
 }
 
-/* Styling Modal/Popup */
+.photo-hover-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.photo-thumbnail-container:hover .photo-hover-text {
+  opacity: 1;
+}
+
+/* Styling Modal/Popup Foto */
 .photo-modal-overlay {
   position: fixed;
   top: 0;
@@ -570,29 +588,66 @@
   justify-content: center;
   align-items: center;
   z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .photo-modal-content {
   position: relative;
-  max-width: 85%;
-  max-height: 85%;
-  border-radius: 12px;
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.photo-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.photo-modal-footer {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 1.5rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .photo-full-size {
   display: block;
   max-width: 100%;
-  max-height: 85vh;
+  max-height: 70vh;
   object-fit: contain;
-  border-radius: 12px;
+  padding: 1.5rem;
 }
 
 .photo-modal-close {
-  position: absolute;
-  top: 15px;
-  right: 15px;
   background: rgba(255, 255, 255, 0.15);
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 50%;
@@ -600,7 +655,6 @@
   font-size: 20px;
   font-weight: bold;
   cursor: pointer;
-  z-index: 2001;
   width: 40px;
   height: 40px;
   transition: all 0.3s ease;
@@ -611,6 +665,31 @@
 
 .photo-modal-close:hover {
   background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.photo-download-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #4facfe;
+  text-decoration: none;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: rgba(79, 172, 254, 0.1);
+  transition: all 0.3s ease;
+}
+
+.photo-download-link:hover {
+  background: rgba(79, 172, 254, 0.2);
+  text-decoration: none;
+}
+
+/* Pastikan table cell untuk foto memiliki ukuran konsisten */
+.report-table td:nth-child(6) {
+  min-width: 80px;
+  text-align: center;
 }
 
 /* Responsive Design */
@@ -676,6 +755,7 @@
   
   .report-filter-actions {
     flex-direction: column;
+    margin-top: 1rem;
   }
   
   .report-table-header {
@@ -693,6 +773,21 @@
   
   .report-stats {
     grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .photo-thumbnail {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .photo-modal-content {
+    max-width: 95%;
+    max-height: 85%;
+  }
+  
+  .photo-full-size {
+    padding: 1rem;
+    max-height: 60vh;
   }
 }
 
@@ -724,8 +819,18 @@
     min-width: 800px;
   }
   
+  .photo-thumbnail {
+    width: 35px;
+    height: 35px;
+  }
+  
   .photo-modal-content {
-    max-width: 95%;
+    max-width: 98%;
     max-height: 80%;
+  }
+  
+  .photo-full-size {
+    padding: 0.8rem;
+    max-height: 55vh;
   }
 }

@@ -180,6 +180,38 @@ function PresensiPage() {
     }
     return shapes;
   };
+  // Tambahkan di PresensiPage.js
+const [lastPresensi, setLastPresensi] = useState(null);
+
+// Tambahkan fungsi untuk mengambil presensi terakhir
+const fetchLastPresensi = async () => {
+  try {
+    const response = await axios.get(
+      `${API_BASE_URL}/last`, // Buat endpoint ini di backend
+      getAuthHeaders()
+    );
+    setLastPresensi(response.data.data);
+  } catch (err) {
+    console.error("Gagal mengambil data presensi:", err);
+  }
+};
+
+// Panggil di useEffect
+useEffect(() => {
+  getLocation();
+  fetchLastPresensi(); // Tambahkan ini
+}, []);
+
+// Tambahkan di JSX, misalnya di kolom kanan:
+{lastPresensi?.buktiFoto && (
+  <div className="last-photo-section">
+    <h4>Foto Terakhir:</h4>
+    <img 
+      src={`http://localhost:3001/uploads/presensi/${lastPresensi.buktiFoto}`}
+      alt="Foto presensi terakhir"
+    />
+  </div>
+)}
 
   return (
     <div className="presensi-container">
@@ -213,93 +245,134 @@ function PresensiPage() {
           <p className="presensi-subtitle">Catat kehadiran Anda dengan mudah dan akurat</p>
         </div>
 
-        {/* Status Lokasi */}
-        <div className="presensi-location-status-wrapper">
-          <div className={`presensi-location-status ${coords ? 'status-ok' : (isLocationLoading ? 'status-loading' : 'status-fail')}`}>
-            <svg fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-            </svg>
-            <span>
-              {isLocationLoading ? 'Mencari lokasi Anda...' : 
-               coords ? `Lokasi ditemukan: ${coords.lat.toFixed(6)}, ${coords.lng.toFixed(6)}` : 
-               'Lokasi tidak dapat diakses'}
-            </span>
+        {/* Layout Horizontal: Peta dan Kamera bersebelahan */}
+        <div className="presensi-main-layout">
+          {/* Kolom Kiri: Card Lokasi dan Peta */}
+          <div className="presensi-left-column">
+            {/* Card Status Lokasi */}
+            <div className="presensi-location-card">
+              <div className="presensi-location-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>Informasi Lokasi</span>
+              </div>
+              
+              <div className="presensi-location-info">
+                <div className="presensi-location-text">
+                  <svg fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                  </svg>
+                  <span>
+                    {isLocationLoading 
+                      ? 'Mencari lokasi Anda...' 
+                      : coords 
+                        ? 'Lokasi berhasil ditemukan' 
+                        : 'Lokasi tidak dapat diakses'}
+                  </span>
+                </div>
+                
+                {coords && (
+                  <div className="presensi-coordinates">
+                    <div className="presensi-coord-item">
+                      <span className="presensi-coord-label">Latitude:</span>
+                      <span className="presensi-coord-value">{coords.lat.toFixed(6)}</span>
+                    </div>
+                    <div className="presensi-coord-item">
+                      <span className="presensi-coord-label">Longitude:</span>
+                      <span className="presensi-coord-value">{coords.lng.toFixed(6)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Visualisasi Peta */}
+            {coords && (
+              <div className="presensi-map-wrapper"> 
+                <MapContainer 
+                  key={`${coords.lat}-${coords.lng}`}
+                  center={[coords.lat, coords.lng]} 
+                  zoom={16} 
+                  style={{ height: '100%', width: '100%' }}
+                  scrollWheelZoom={false}
+                  dragging={false}
+                >
+                  <TileLayer
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+                  />
+                  <Marker position={[coords.lat, coords.lng]}>
+                    <Popup>Anda berada di sini</Popup>
+                  </Marker>
+                </MapContainer>
+              </div>
+            )}
+          </div>
+
+          {/* Kolom Kanan: Card Kamera */}
+          <div className="presensi-right-column">
+            <div className="presensi-camera-card">
+              <div className="presensi-camera-header">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span>Selfie Presensi</span>
+              </div>
+              
+              <div className="presensi-camera-container">
+                {image ? (
+                  <img src={image} alt="Selfie Bukti Presensi" className="presensi-photo" />
+                ) : (
+                  <Webcam
+                    audio={false}
+                    ref={webcamRef}
+                    screenshotFormat="image/jpeg"
+                    className="presensi-webcam"
+                    videoConstraints={{
+                      facingMode: "user",
+                      width: 640,
+                      height: 480
+                    }}
+                  />
+                )}
+              </div>
+
+              {/* Tombol Kamera */}
+              <div className="presensi-camera-actions">
+                {!image ? (
+                  <button
+                    onClick={capture}
+                    disabled={isLoading || isLocationLoading}
+                    className="presensi-capture-btn"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Ambil Foto
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => setImage(null)} 
+                    disabled={isLoading}
+                    className="presensi-retake-btn"
+                  >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Foto Ulang
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Visualisasi Peta */}
-        {coords && (
-          <div className="presensi-map-wrapper"> 
-            <MapContainer 
-              key={`${coords.lat}-${coords.lng}`}
-              center={[coords.lat, coords.lng]} 
-              zoom={16} 
-              style={{ height: '100%', width: '100%' }}
-              scrollWheelZoom={false}
-              dragging={false}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-              />
-              <Marker position={[coords.lat, coords.lng]}>
-                <Popup>Anda berada di sini</Popup>
-              </Marker>
-            </MapContainer>
-          </div>
-        )}
-
-        {/* Main Card */}
+        {/* Main Card (untuk tombol check-in/out dan info) */}
         <div className="presensi-card">
-          {/* Camera Section */}
-          <div className="presensi-camera-section">
-            <div className="presensi-camera-container">
-              {image ? (
-                <img src={image} alt="Selfie Bukti Presensi" className="presensi-photo" />
-              ) : (
-                <Webcam
-                  audio={false}
-                  ref={webcamRef}
-                  screenshotFormat="image/jpeg"
-                  className="presensi-webcam"
-                  videoConstraints={{
-                    facingMode: "user",
-                    width: 640,
-                    height: 480
-                  }}
-                />
-              )}
-            </div>
-
-            {/* Tombol Kamera */}
-            <div className="presensi-camera-actions">
-              {!image ? (
-                <button
-                  onClick={capture}
-                  disabled={isLoading || isLocationLoading}
-                  className="presensi-capture-btn"
-                >
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  Ambil Foto
-                </button>
-              ) : (
-                <button 
-                  onClick={() => setImage(null)} 
-                  disabled={isLoading}
-                  className="presensi-retake-btn"
-                >
-                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Foto Ulang
-                </button>
-              )}
-            </div>
-          </div>
-
           {/* Status Messages */}
           <div className="presensi-status">
             {isLoading && (
@@ -328,7 +401,7 @@ function PresensiPage() {
             )}
           </div>
 
-          {/* Action Buttons - PERBAIKAN: Check-Out tidak membutuhkan foto */}
+          {/* Action Buttons */}
           <div className="presensi-actions">
             <button
               onClick={handleCheckIn}
@@ -372,5 +445,6 @@ function PresensiPage() {
     </div>
   );
 }
+
 
 export default PresensiPage;

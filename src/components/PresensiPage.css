@@ -24,7 +24,7 @@
   position: relative;
   z-index: 2;
   padding: 1.5rem;
-  max-width: 650px;
+  max-width: 1200px;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -119,39 +119,45 @@
   transform: translateX(-3px);
 }
 
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-50px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+/* --- Layout Horizontal --- */
+.presensi-main-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  width: 100%;
+  margin-bottom: 1.5rem;
+}
+
+.presensi-left-column,
+.presensi-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 /* --- Header Section --- */
 .presensi-header {
+  grid-column: 1 / -1;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   width: 100%;
-  padding: 2rem;
+  padding: 1.5rem;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
-  border-radius: 24px;
+  border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .presensi-header-icon {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   background: linear-gradient(135deg, #4facfe, #00f2fe);
-  border-radius: 20px;
+  border-radius: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.5rem;
-  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.4);
+  margin: 0 auto 1rem;
+  box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
   transition: transform 0.3s ease;
 }
 
@@ -160,106 +166,201 @@
 }
 
 .presensi-header-icon svg {
-  width: 35px;
-  height: 35px;
+  width: 25px;
+  height: 25px;
   color: white;
 }
 
 .presensi-title {
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: white;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.5rem;
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .presensi-subtitle {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   font-weight: 400;
   line-height: 1.5;
 }
 
-/* --- Status Lokasi --- */
-.presensi-location-status-wrapper {
+/* --- Status Lokasi dalam Card --- */
+.presensi-location-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 18px;
+  padding: 1.2rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   width: 100%;
-  margin-bottom: 1.5rem;
+  height: fit-content;
 }
 
-.presensi-location-status {
+.presensi-location-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 1rem 1.5rem;
-  border-radius: 14px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  border: 1px solid;
+  gap: 8px;
+  margin-bottom: 0.8rem;
 }
 
-.presensi-location-status svg {
+.presensi-location-header svg {
   width: 20px;
   height: 20px;
+  color: #4facfe;
+}
+
+.presensi-location-header span {
+  font-weight: 600;
+  color: white;
+  font-size: 0.95rem;
+}
+
+.presensi-location-info {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.8rem;
+  margin-bottom: 0;
+}
+
+.presensi-location-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin-bottom: 0.6rem;
+}
+
+.presensi-location-text svg {
+  width: 16px;
+  height: 16px;
   flex-shrink: 0;
-}
-
-.status-ok {
-  background: rgba(76, 217, 100, 0.15);
   color: #4cd964;
-  border-color: rgba(76, 217, 100, 0.3);
 }
 
-.status-loading {
-  background: rgba(255, 204, 0, 0.15);
-  color: #ffcc00;
-  border-color: rgba(255, 204, 0, 0.3);
+.presensi-coordinates {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 0.7rem;
+  margin-top: 0.4rem;
 }
 
-.status-fail {
-  background: rgba(255, 59, 48, 0.15);
-  color: #ffcc00;
-  border-color: rgba(255, 59, 48, 0.3);
+.presensi-coord-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+}
+
+.presensi-coord-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.presensi-coord-value {
+  color: white;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* --- Map Container --- */
 .presensi-map-wrapper {
   width: 100%;
-  margin-bottom: 2rem;
-  border-radius: 18px;
+  height: 100%;
+  min-height: 250px;
+  max-height: 250px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.2);
+  flex-grow: 1;
 }
 
 .leaflet-container {
-  height: 280px !important;
+  height: 100% !important;
+  min-height: 250px;
+  max-height: 250px;
   width: 100% !important;
-  border-radius: 16px;
+  border-radius: 14px;
 }
 
 /* --- Camera Section --- */
 .presensi-camera-section {
   width: 100%;
-  margin-bottom: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.presensi-camera-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 18px;
+  padding: 1.2rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.presensi-camera-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 0.8rem;
+}
+
+.presensi-camera-header svg {
+  width: 20px;
+  height: 20px;
+  color: #f39c12;
+}
+
+.presensi-camera-header span {
+  font-weight: 600;
+  color: white;
+  font-size: 0.95rem;
 }
 
 .presensi-camera-container {
   width: 100%;
-  border-radius: 18px;
+  height: 100%;
+  min-height: 220px;
+  max-height: 220px;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
   background: #000;
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
-  margin-bottom: 1.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+  flex-grow: 1;
+  margin-bottom: 1rem;
 }
 
 .presensi-webcam,
 .presensi-photo {
   width: 100%;
-  height: 320px;
+  height: 100%;
+  min-height: 220px;
+  max-height: 220px;
   object-fit: cover;
   display: block;
 }
@@ -267,44 +368,45 @@
 .presensi-camera-actions {
   display: flex;
   justify-content: center;
+  margin-top: auto;
 }
 
 .presensi-capture-btn,
 .presensi-retake-btn {
-  padding: 1rem 2rem;
+  padding: 0.7rem 1.2rem;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  min-width: 180px;
+  gap: 6px;
+  min-width: 120px;
 }
 
 .presensi-capture-btn {
   background: linear-gradient(135deg, #1abc9c, #16a085);
   color: white;
-  box-shadow: 0 6px 20px rgba(26, 188, 156, 0.3);
+  box-shadow: 0 4px 12px rgba(26, 188, 156, 0.3);
 }
 
 .presensi-capture-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(26, 188, 156, 0.4);
+  box-shadow: 0 6px 16px rgba(26, 188, 156, 0.4);
 }
 
 .presensi-retake-btn {
   background: linear-gradient(135deg, #f39c12, #e67e22);
   color: white;
-  box-shadow: 0 6px 20px rgba(243, 156, 18, 0.3);
+  box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
 }
 
 .presensi-retake-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(243, 156, 18, 0.4);
+  box-shadow: 0 6px 16px rgba(243, 156, 18, 0.4);
 }
 
 .presensi-capture-btn:disabled,
@@ -314,21 +416,23 @@
   transform: none !important;
 }
 
-/* --- Main Card --- */
+/* --- Main Card (untuk tombol check-in/out dan info) --- */
 .presensi-card {
+  grid-column: 1 / -1;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 24px;
-  padding: 2.5rem;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+  border-radius: 18px;
+  padding: 1.5rem;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
   width: 100%;
+  margin-top: 0;
 }
 
-/* Status Messages */
+/* Status Messages - DIPERKECIL TINGGINYA SAJA */
 .presensi-status {
-  margin-bottom: 2rem;
+  margin-bottom: 1.2rem;
 }
 
 .presensi-loading,
@@ -336,12 +440,16 @@
 .presensi-error {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 1.2rem 1.5rem;
-  border-radius: 14px;
+  gap: 8px;
+  padding: 0.6rem 0.9rem;
+  border-radius: 10px;
   font-weight: 500;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
   animation: fadeIn 0.3s ease;
+  margin-bottom: 0.3rem;
+  min-height: 40px;
+  max-height: 40px;
+  overflow: hidden;
 }
 
 .presensi-loading {
@@ -351,10 +459,10 @@
 }
 
 .presensi-spinner {
-  width: 22px;
-  height: 22px;
-  border: 3px solid rgba(255, 255, 255, 0.2);
-  border-top: 3px solid white;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top: 2px solid white;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -371,7 +479,7 @@
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-5px);
   }
   to {
     opacity: 1;
@@ -395,39 +503,40 @@
 .presensi-actions {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.2rem;
-  margin-bottom: 2.5rem;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
 }
 
 .presensi-btn {
-  padding: 1.2rem 1.5rem;
+  padding: 0.8rem 1rem;
   border: none;
-  border-radius: 14px;
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  min-height: 56px;
+  gap: 6px;
+  min-height: 45px;
+  max-height: 45px;
 }
 
 .presensi-checkin {
   background: linear-gradient(135deg, #4facfe, #00f2fe);
-  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.3);
+  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
 }
 
 .presensi-checkout {
   background: linear-gradient(135deg, #f093fb, #f5576c);
-  box-shadow: 0 8px 25px rgba(245, 87, 108, 0.3);
+  box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
 }
 
 .presensi-btn:hover:not(.disabled) {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 .presensi-btn.disabled {
@@ -437,44 +546,44 @@
 }
 
 .presensi-btn svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
 }
 
 /* Info Section */
 .presensi-info {
-  padding-top: 2rem;
+  padding-top: 1.2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 .presensi-info-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 1.2rem;
+  gap: 8px;
+  font-size: 1rem;
   font-weight: 600;
   color: white;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.8rem;
 }
 
 .presensi-info-header svg {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   color: #4facfe;
 }
 
 .presensi-info-content {
   background: rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 1.5rem;
+  border-radius: 10px;
+  padding: 0.9rem;
 }
 
 .presensi-info-content p {
   color: rgba(255, 255, 255, 0.9);
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 0.8rem;
-  padding-left: 1.2rem;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+  padding-left: 0.8rem;
   position: relative;
 }
 
@@ -483,7 +592,7 @@
   color: #4facfe;
   position: absolute;
   left: 0;
-  font-size: 1.2rem;
+  font-size: 0.9rem;
 }
 
 .presensi-info-content p:last-child {
@@ -491,6 +600,29 @@
 }
 
 /* Responsive Design */
+@media (max-width: 1024px) {
+  .presensi-main-layout {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .presensi-map-wrapper {
+    min-height: 220px;
+    max-height: 220px;
+  }
+  
+  .presensi-camera-container {
+    min-height: 200px;
+    max-height: 200px;
+  }
+  
+  .presensi-webcam,
+  .presensi-photo {
+    min-height: 200px;
+    max-height: 200px;
+  }
+}
+
 @media (max-width: 768px) {
   .presensi-container {
     padding: 15px;
@@ -501,31 +633,42 @@
   }
   
   .presensi-header {
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: 1.2rem;
+    margin-bottom: 1rem;
   }
   
   .presensi-title {
-    font-size: 1.9rem;
+    font-size: 1.6rem;
   }
   
   .presensi-subtitle {
-    font-size: 1rem;
+    font-size: 0.85rem;
   }
   
   .presensi-actions {
     grid-template-columns: 1fr;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    gap: 0.6rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .presensi-map-wrapper {
+    min-height: 200px;
+    max-height: 200px;
+  }
+  
+  .presensi-camera-container {
+    min-height: 180px;
+    max-height: 180px;
   }
   
   .presensi-webcam,
   .presensi-photo {
-    height: 280px;
+    min-height: 180px;
+    max-height: 180px;
   }
   
   .presensi-card {
-    padding: 2rem;
+    padding: 1.2rem;
   }
   
   .presensi-dashboard-back-btn {
@@ -552,33 +695,50 @@
     height: 24px;
   }
   
-  .presensi-camera-container {
-    margin-bottom: 1.2rem;
+  .presensi-loading,
+  .presensi-message,
+  .presensi-error {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+    min-height: 36px;
+    max-height: 36px;
   }
 }
 
 @media (max-width: 480px) {
   .presensi-title {
-    font-size: 1.7rem;
+    font-size: 1.4rem;
   }
   
   .presensi-subtitle {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
+  }
+  
+  .presensi-map-wrapper {
+    min-height: 180px;
+    max-height: 180px;
+  }
+  
+  .presensi-camera-container {
+    min-height: 160px;
+    max-height: 160px;
   }
   
   .presensi-webcam,
   .presensi-photo {
-    height: 240px;
+    min-height: 160px;
+    max-height: 160px;
   }
   
   .presensi-btn {
-    padding: 1rem 1.2rem;
-    font-size: 0.95rem;
-    min-height: 52px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.85rem;
+    min-height: 40px;
+    max-height: 40px;
   }
   
   .presensi-card {
-    padding: 1.8rem;
+    padding: 1rem;
   }
   
   .presensi-dashboard-back-btn {
@@ -594,6 +754,27 @@
   }
   
   .presensi-info-content {
-    padding: 1.2rem;
+    padding: 0.8rem;
+  }
+  
+  .presensi-location-card,
+  .presensi-camera-card {
+    padding: 1rem;
+  }
+  
+  .presensi-capture-btn,
+  .presensi-retake-btn {
+    padding: 0.6rem 1rem;
+    min-width: 110px;
+    font-size: 0.8rem;
+  }
+  
+  .presensi-loading,
+  .presensi-message,
+  .presensi-error {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.75rem;
+    min-height: 34px;
+    max-height: 34px;
   }
 }
