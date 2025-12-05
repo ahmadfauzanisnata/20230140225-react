@@ -12,7 +12,7 @@ function ReportPage() {
 
   // Base URL untuk mengakses foto dari server
   const API_BASE_URL = "http://localhost:3001";
-  const UPLOADS_BASE_URL = `${API_BASE_URL}/uploads`;
+  const UPLOADS_BASE_URL = `${API_BASE_URL}`;
 
   useEffect(() => {
     const mockTokenKey = 'mock_auth_token_set';
